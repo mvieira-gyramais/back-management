@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+
+  mongodb:
+    container_name: mongodb-teste
+    image: mongo:latest
+    ports:
+      - 27007:27017
+    volumes:
+      - mongodb:/data
+      - ./docker/mongo-init.sh:/scripts/mongo-init.sh
+    command: |
+      --replSet s0
+    networks:
+      - gyra-network
+      
+  nest.js:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: management
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/home/app/management
+      - ./node_modules:/home/app/management/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - gyra-network
+      
+networks:
+   gyra-network:
+    driver: bridge
+
+volumes:
+  mongodb:
